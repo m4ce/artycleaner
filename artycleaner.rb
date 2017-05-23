@@ -174,7 +174,7 @@ config['repos'].each do |repo_key, repo_cfg|
 
           tags_needed = cfg['keep_tags'] - to_keep.size
           if tags_needed > 0 and (to_delete.size - tags_needed) > 0
-            to_delete.sort_by! { |i| i['timestamp'] }.reverse
+            to_delete.sort_by! { |i| i['timestamp'] }.reverse!
             to_keep += to_delete.shift(tags_needed)
           end
 
