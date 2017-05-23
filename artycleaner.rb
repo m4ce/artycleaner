@@ -165,23 +165,38 @@ config['repos'].each do |repo_key, repo_cfg|
             if purge_ttl.nil? or (tag_stats['lastDownloaded'] and tag_stats['lastDownloaded'] >= purge_ttl) or (tag_info['created'] and tag_info['created'] >= purge_ttl) or (tag_info['lastModified'] and tag_info['lastModified'] >= purge_ttl)
               to_keep << tag_path
             else
-              to_delete << tag_path
+              to_delete << {
+                'path' => tag_path,
+                'timestamp' => tag_stats['lastDownloaded'] || tag_info['creation'] || tag_stats['lastModified']
+              }
             end
           end
+
+          tags_needed = cfg['keep_tags'] - to_keep.size
+          if tags_needed > 0 and (to_delete.size - tags_needed) > 0
+            to_delete.sort_by! { |i| i['timestamp'] }.reverse
+            to_keep += to_delete.shift(tags_needed)
+          end
+
+          to_delete.map! { |i| i['path'] }
 
           if to_keep.size < cfg['keep_tags']
             logger.info("Skipping purge for image #{docker_image['name']} - minimum number of tags to keep not met")
           else
-            logger.debug("The following items will be kept: #{to_keep.join(', ')}")
-            logger.debug("The following items will be deleted: #{to_delete.join(', ')}")
+            if to_delete.size > 0
+              logger.debug("The following items will be kept: #{to_keep.join(', ')}")
+              logger.debug("The following items will be deleted: #{to_delete.join(', ')}")
 
-            to_delete.each do |path|
-              if options['dryrun']
-                logger.warn("Would've deleted #{path}")
-              else
-                logger.warn("Deleting #{path}")
-                artifactory.file_delete(repo_key: repo_key, path: path)
+              to_delete.each do |path|
+                if options['dryrun']
+                  logger.warn("Would've deleted #{path}")
+                else
+                  logger.warn("Deleting #{path}")
+                  artifactory.file_delete(repo_key: repo_key, path: path)
+                end
               end
+            else
+              logger.info("Nothing to delete for image #{docker_image['name']}")
             end
           end
         end
@@ -232,7 +247,7 @@ config['repos'].each do |repo_key, repo_cfg|
           end
         end
       else
-        logger.info("No files to delete")
+        logger.info("No files to delete for repo #{repo_key}")
       end
   end
 end
