@@ -1,0 +1,19 @@
+---
+api:
+  endpoint: 'https://example.org/artifactory'
+  api_key: ''
+  ssl_verify: false
+defaults:
+  purge_ttl: "60d"
+  keep_tags: 60
+  include_pattern: []
+  exclude_pattern: []
+  include_tags: []
+  exclude_tags:
+    - "latest"
+repos:
+  "docker-local":
+    purge_ttl: "30d"
+    keep_tags: 30
+    exclude_tags:
+      - 'stable'
