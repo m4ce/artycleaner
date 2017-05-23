@@ -167,7 +167,7 @@ config['repos'].each do |repo_key, repo_cfg|
             else
               to_delete << {
                 'path' => tag_path,
-                'timestamp' => tag_stats['lastDownloaded'] || tag_info['creation'] || tag_info['lastModified']
+                'timestamp' => tag_stats['lastDownloaded'] || tag_info['created'] || tag_info['lastModified']
               }
             end
           end
