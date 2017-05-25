@@ -33,7 +33,7 @@ options = {}
 begin
   OptionParser.new do |opts|
     options['config_file'] = File.join(__dir__, 'artycleaner.yaml')
-    opts.on("-c", "--config", "Configuration file (default: #{options['config_file']})") do |config_file|
+    opts.on("-c", "--config <PATH>", "Configuration file (default: #{options['config_file']})") do |config_file|
       options['config_file'] = config_file
     end
 
@@ -53,7 +53,7 @@ rescue
 end
 
 begin
-  config = YAML::load_file(File.open(options['config_file']))
+  config = YAML::load_file(options['config_file'])
 rescue
   STDERR.puts("Failed to load configuration - #{$!}")
   exit 1
